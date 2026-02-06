@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Use bun from home directory if not in PATH
+if command -v bun >/dev/null 2>&1; then
+  bun lint-staged
+else
+  ~/.bun/bin/bun lint-staged
+fi
