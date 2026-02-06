@@ -3,7 +3,10 @@
 
 # Use bun from home directory if not in PATH
 if command -v bun >/dev/null 2>&1; then
-  bun lint-staged
+  BUN=bun
 else
-  ~/.bun/bin/bun lint-staged
+  BUN=~/.bun/bin/bun
 fi
+
+$BUN run typecheck
+$BUN lint-staged

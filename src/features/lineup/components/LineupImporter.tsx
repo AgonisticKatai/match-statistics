@@ -38,7 +38,7 @@ export function LineupImporter({ onImported }: LineupImporterProps) {
         throw new Error(`Error ${response.status}: ${response.statusText}`)
       }
 
-      const data = await response.json()
+      const data = (await response.json()) as ScrapedLineupData
       onImported(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al importar alineaciones')

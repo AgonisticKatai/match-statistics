@@ -109,7 +109,7 @@ function TeamFormSection({
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-gray-900">{label}</h3>
+      <h3 className="font-semibold text-primary-700">{label}</h3>
 
       <Input
         label="Nombre del equipo"
@@ -120,7 +120,7 @@ function TeamFormSection({
       />
 
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-700">Titulares</h4>
+        <h4 className="text-sm font-semibold text-primary-600">Titulares</h4>
         {team.starters.map(player => (
           <PlayerRowInput
             key={player.id}
@@ -130,13 +130,13 @@ function TeamFormSection({
             canRemove={team.starters.length > 1}
           />
         ))}
-        <Button variant="ghost" size="sm" onClick={() => addPlayer('starters')}>
+        <Button variant="outline" size="sm" onClick={() => addPlayer('starters')}>
           + Titular
         </Button>
       </div>
 
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-700">Suplentes</h4>
+        <h4 className="text-sm font-semibold text-primary-600">Suplentes</h4>
         {team.substitutes.map(player => (
           <PlayerRowInput
             key={player.id}
@@ -146,7 +146,7 @@ function TeamFormSection({
             canRemove={team.substitutes.length > 1}
           />
         ))}
-        <Button variant="ghost" size="sm" onClick={() => addPlayer('substitutes')}>
+        <Button variant="outline" size="sm" onClick={() => addPlayer('substitutes')}>
           + Suplente
         </Button>
       </div>
