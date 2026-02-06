@@ -53,14 +53,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const html = await response.text()
     const $ = cheerio.load(html)
 
-    // Extract team names from header
+    // Extract team names from header (only first 2, as there are duplicate headers)
     const teamNames: string[] = []
-    $('.acta-equip a span').each((_, el) => {
-      const name = $(el).text().trim()
-      if (name) {
-        teamNames.push(name)
-      }
-    })
+    $('.acta-equip a span')
+      .slice(0, 2)
+      .each((_, el) => {
+        const name = $(el).text().trim()
+        if (name) {
+          teamNames.push(name)
+        }
+      })
 
     if (teamNames.length !== 2) {
       return res.status(500).json({
