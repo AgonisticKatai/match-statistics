@@ -46,7 +46,11 @@ function matchReducer(state: MatchState, action: MatchAction): MatchState {
       return { ...state, isPlaying: false }
 
     case 'RESUME_MATCH':
-      return { ...state, isPlaying: true }
+      return {
+        ...state,
+        isPlaying: true,
+        startTime: Date.now() - state.elapsedTime,
+      }
 
     case 'END_MATCH':
       return { ...state, isPlaying: false }
