@@ -62,19 +62,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     })
 
-    // Extract teams data
-    const teams: TeamData[] = []
+    if (teamNames.length !== 2) {
+      return res.status(500).json({
+        error: `Expected 2 team names, found ${teamNames.length}`,
+      })
+    }
 
-    // Find all tables with player data
+    // Initialize teams
+    const teams: TeamData[] = [
+      { name: teamNames[0]!, players: [] },
+      { name: teamNames[1]!, players: [] },
+    ]
+
+    let currentTeamIndex = 0
+    let foundStartersForTeam = false
+
+    // Find all tables with player data (only Titulars and Suplents)
     $('.acta-table').each((_, table) => {
       const $table = $(table)
 
       // Check if this is a Titulars or Suplents table
-      const headerText = $table.find('thead th').text().trim()
-      const isStarter = headerText === 'Titulars'
+      const headerText = $table.find('thead th').first().text().trim()
 
       // Skip if not a player table
       if (headerText !== 'Titulars' && headerText !== 'Suplents') {
+        return
+      }
+
+      const isStarter = headerText === 'Titulars'
+
+      // If we find Titulars after having found Suplents, move to next team
+      if (isStarter && foundStartersForTeam) {
+        currentTeamIndex++
+        foundStartersForTeam = false
+      }
+
+      if (isStarter) {
+        foundStartersForTeam = true
+      }
+
+      // Stop if we've processed both teams
+      if (currentTeamIndex >= 2) {
         return
       }
 
@@ -90,18 +118,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const name = $row.find('td:nth-child(2) a').text().trim()
 
         if (name && number) {
-          // Find or create team for this player
-          const teamIndex = Math.floor(teams.length / 2) * 2 + (teams.length % 2)
-
-          if (!teams[teamIndex]) {
-            teams.push({
-              name: teamNames[teamIndex] || `Equipo ${teamIndex + 1}`,
-              players: [],
-            })
-          }
-
-          teams[teamIndex]!.players.push({
-            id: `${teamIndex}-${number}-${Date.now()}-${Math.random()}`,
+          teams[currentTeamIndex]!.players.push({
+            id: `${currentTeamIndex}-${number}-${Date.now()}-${Math.random()}`,
             name,
             number,
             isStarter,
