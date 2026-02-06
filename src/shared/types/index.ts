@@ -19,6 +19,7 @@ export type MatchEvent = {
   timestamp: number
   playerId: string
   teamId: string
+  secondPlayerId?: string
   description?: string
 }
 

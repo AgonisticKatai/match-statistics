@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Card, Button } from '@/shared/components'
 import { useMatch, matchActions } from '@/shared/context/MatchContext'
 import { MatchTimer } from './MatchTimer'
+import { EventRecorder } from './EventRecorder'
+import { EventLog } from './EventLog'
 
 type MatchControlPageProps = {
   onBackToLineup: () => void
@@ -80,6 +82,19 @@ export function MatchControlPage({ onBackToLineup }: MatchControlPageProps) {
               <MatchTimer />
             </div>
           </Card>
+        )}
+
+        {(phase === 'playing' || phase === 'paused') && (
+          <div className="space-y-6 mb-6">
+            <EventRecorder />
+            <EventLog />
+          </div>
+        )}
+
+        {phase === 'finished' && state.events.length > 0 && (
+          <div className="mb-6">
+            <EventLog />
+          </div>
         )}
 
         <Card>
