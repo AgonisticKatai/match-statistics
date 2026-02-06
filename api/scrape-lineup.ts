@@ -53,60 +53,61 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const html = await response.text()
     const $ = cheerio.load(html)
 
+    // Extract team names from header
+    const teamNames: string[] = []
+    $('.acta-equip a span').each((_, el) => {
+      const name = $(el).text().trim()
+      if (name) {
+        teamNames.push(name)
+      }
+    })
+
     // Extract teams data
     const teams: TeamData[] = []
 
-    // Find both team sections
-    $('h2').each((_, element) => {
-      const teamName = $(element).text().trim()
+    // Find all tables with player data
+    $('.acta-table').each((_, table) => {
+      const $table = $(table)
 
-      if (!teamName) return
+      // Check if this is a Titulars or Suplents table
+      const headerText = $table.find('thead th').text().trim()
+      const isStarter = headerText === 'Titulars'
 
-      // Get the next sections after the team name
-      const nextElements = $(element).nextUntil('h2')
+      // Skip if not a player table
+      if (headerText !== 'Titulars' && headerText !== 'Suplents') {
+        return
+      }
 
-      const players: Player[] = []
+      // Extract players from tbody rows
+      $table.find('tbody tr').each((_, row) => {
+        const $row = $(row)
 
-      nextElements.each((_, el) => {
-        const text = $(el).text()
+        // Get jersey number from first td
+        const numberText = $row.find('td').first().find('.num-samarreta-acta2').text().trim()
+        const number = numberText ? Number.parseInt(numberText, 10) : 0
 
-        // Look for "Titulars" or "Suplents" sections
-        if (text.includes('Titulars') || text.includes('Suplents')) {
-          const isStarter = text.includes('Titulars')
+        // Get player name from second td link
+        const name = $row.find('td:nth-child(2) a').text().trim()
 
-          // Get list items after this section
-          $(el)
-            .find('li')
-            .each((_, li) => {
-              const playerText = $(li).text().trim()
+        if (name && number) {
+          // Find or create team for this player
+          const teamIndex = Math.floor(teams.length / 2) * 2 + (teams.length % 2)
 
-              // Extract number and name
-              // Format: "1. SURNAME, Name" or similar
-              const match = playerText.match(/^(\d+)\.\s*(.+)$/)
-
-              if (match) {
-                const number = Number.parseInt(match[1] || '0', 10)
-                const name = match[2]?.trim() || ''
-
-                if (name) {
-                  players.push({
-                    id: `${teamName}-${number}-${Date.now()}`,
-                    name,
-                    number,
-                    isStarter,
-                  })
-                }
-              }
+          if (!teams[teamIndex]) {
+            teams.push({
+              name: teamNames[teamIndex] || `Equipo ${teamIndex + 1}`,
+              players: [],
             })
+          }
+
+          teams[teamIndex]!.players.push({
+            id: `${teamIndex}-${number}-${Date.now()}-${Math.random()}`,
+            name,
+            number,
+            isStarter,
+          })
         }
       })
-
-      if (players.length > 0) {
-        teams.push({
-          name: teamName,
-          players,
-        })
-      }
     })
 
     if (teams.length !== 2) {
