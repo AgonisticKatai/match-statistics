@@ -5,6 +5,7 @@ import { MatchTimer } from './MatchTimer'
 import { EventRecorder } from './EventRecorder'
 import { EventLog } from './EventLog'
 import { MatchStats } from './MatchStats'
+import { MatchExport } from './MatchExport'
 
 type MatchControlPageProps = {
   onBackToLineup: () => void
@@ -93,10 +94,15 @@ export function MatchControlPage({ onBackToLineup }: MatchControlPageProps) {
           </div>
         )}
 
-        {phase === 'finished' && state.events.length > 0 && (
+        {phase === 'finished' && (
           <div className="space-y-6 mb-6">
-            <MatchStats />
-            <EventLog />
+            {state.events.length > 0 && (
+              <>
+                <MatchStats />
+                <EventLog />
+              </>
+            )}
+            <MatchExport />
           </div>
         )}
 

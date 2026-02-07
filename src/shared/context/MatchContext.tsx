@@ -1,6 +1,26 @@
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 import type { ReactNode } from 'react'
 import type { MatchState, MatchEvent, Team } from '../types'
+
+const STORAGE_KEY = 'match-statistics-state'
+
+function loadState(): MatchState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as MatchState
+  } catch {
+    return null
+  }
+}
+
+function saveState(state: MatchState): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // storage full or unavailable
+  }
+}
 
 // Action types
 type MatchAction =
@@ -72,6 +92,7 @@ function matchReducer(state: MatchState, action: MatchAction): MatchState {
       }
 
     case 'RESET_MATCH':
+      localStorage.removeItem(STORAGE_KEY)
       return initialState
 
     default:
@@ -90,7 +111,15 @@ const MatchContext = createContext<MatchContextType | undefined>(undefined)
 
 // Provider component
 export function MatchProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(matchReducer, initialState)
+  const [state, dispatch] = useReducer(matchReducer, initialState, () => {
+    const saved = loadState()
+    if (!saved) return initialState
+    return { ...saved, isPlaying: false }
+  })
+
+  useEffect(() => {
+    saveState(state)
+  }, [state])
 
   return <MatchContext.Provider value={{ state, dispatch }}>{children}</MatchContext.Provider>
 }
